@@ -811,7 +811,6 @@
                 });
             }
 
-            // Keičiant balsą, automatiškai pasiūlome to personažo pavyzdinį tekstą
             if (demoVoiceSelect && demoText && charCurrent) {
                 demoVoiceSelect.addEventListener('change', () => {
                     const selectedVoice = voices.find(v => v.id === demoVoiceSelect.value);
