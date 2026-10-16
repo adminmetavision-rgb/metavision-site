@@ -238,15 +238,6 @@
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
         html { scroll-behavior: smooth; }
-        @media (prefers-reduced-motion: reduce) {
-            *, ::before, ::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-                scroll-behavior: auto !important;
-            }
-        }
-
         .hidden { display: none !important; }
     </style>
 </head>
@@ -507,10 +498,8 @@
         </div>
     </footer>
 
-    <!-- Standartinis, visiškai saugus skriptas be išorinių modulių -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            /* ===== CONFIGURATION ===== */
             const HF_URL = "https://marius500-metavision-tts-api.hf.space";
 
             /* ===== THEME ===== */
@@ -555,7 +544,6 @@
             const voiceGrid = document.getElementById('voice-grid');
             const voicesStatus = document.getElementById('voices-status');
 
-            // Kortelių generavimas
             if (voiceGrid) {
                 voiceGrid.innerHTML = '';
                 voices.forEach(voice => {
@@ -614,45 +602,57 @@
                 fillVoiceSelect();
             }
 
-            /* ===== SINTEZAVIMO TIESIOGINĖ FUNKCIJA ===== */
-            async function generateTTS(text, voiceId) {
-                // Siunčiame užklausą į Gradio API
-                const res = await fetch(`${HF_URL}/gradio_api/call/predict`, {
+            /* ===== UNIVERSALI GRADIO SINTEZĖS FUNKCIJA ===== */
+            async function callEndpoint(endpoint, text, voiceId) {
+                const postRes = await fetch(`${HF_URL}/gradio_api/call/${endpoint}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        data: [text.slice(0, 300), voiceId]
-                    })
+                    body: JSON.stringify({ data: [text.slice(0, 300), voiceId] })
                 });
 
-                if (!res.ok) throw new Error("Serverio klaida: " + res.status);
-                const { event_id } = await res.json();
+                if (!postRes.ok) throw new Error(`HTTP ${postRes.status}`);
+                const { event_id } = await postRes.json();
 
-                // Gauname rezultatą iš stream
-                const streamRes = await fetch(`${HF_URL}/gradio_api/call/predict/${event_id}`);
-                const reader = streamRes.body.getReader();
-                const decoder = new TextDecoder();
-                let resultUrl = null;
+                const streamRes = await fetch(`${HF_URL}/gradio_api/call/${endpoint}/${event_id}`);
+                const streamText = await streamRes.text();
 
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    const chunk = decoder.decode(value);
-                    const lines = chunk.split("\n");
-                    for (const line of lines) {
-                        if (line.startsWith("data:")) {
-                            try {
-                                const parsed = JSON.parse(line.replace("data:", "").trim());
-                                if (Array.isArray(parsed) && parsed[0]) {
-                                    resultUrl = parsed[0].url || parsed[0];
+                const lines = streamText.split("\n");
+                for (const line of lines) {
+                    if (line.startsWith("data:")) {
+                        const raw = line.slice(5).trim();
+                        if (!raw || raw === "null") continue;
+                        try {
+                            const parsed = JSON.parse(raw);
+                            if (Array.isArray(parsed) && parsed.length > 0 && parsed[0]) {
+                                const fileData = parsed[0];
+                                if (typeof fileData === "string") {
+                                    return fileData.startsWith("http") ? fileData : `${HF_URL}/gradio_api/file=${fileData}`;
                                 }
-                            } catch(e) {}
-                        }
+                                if (fileData.url) {
+                                    return fileData.url.startsWith("http") ? fileData.url : `${HF_URL}${fileData.url}`;
+                                }
+                                if (fileData.path) {
+                                    return `${HF_URL}/gradio_api/file=${fileData.path}`;
+                                }
+                            }
+                        } catch (e) {}
                     }
                 }
+                throw new Error("Empty audio stream");
+            }
 
-                if (!resultUrl) throw new Error("Garso failas nerastas.");
-                return resultUrl;
+            async function generateTTS(text, voiceId) {
+                // Išbando tiek 'generate_speech' (pagal nutylėjimą), tiek 'predict'
+                const endpoints = ["generate_speech", "predict"];
+                let lastErr = null;
+                for (const ep of endpoints) {
+                    try {
+                        return await callEndpoint(ep, text, voiceId);
+                    } catch (e) {
+                        lastErr = e;
+                    }
+                }
+                throw lastErr;
             }
 
             /* ===== KORTELIŲ GROTUVAS ===== */
@@ -685,10 +685,11 @@
                         btn.innerHTML = pauseIcon;
                         currentPlayingBtn = btn;
                     } catch (err) {
+                        console.error("Card TTS error:", err);
                         btn.innerHTML = playIcon;
                         if (voicesStatus) {
                             voicesStatus.className = 'status-msg error';
-                            voicesStatus.textContent = 'Nepavyko sugeneruoti balso pavyzdžio.';
+                            voicesStatus.textContent = 'Nepavyko sugeneruoti balso pavyzdžio (' + err.message + ').';
                         }
                     }
                 });
@@ -746,9 +747,10 @@
                         }
                         await demoAudio.play().catch(() => {});
                     } catch (error) {
+                        console.error("Demo TTS error:", error);
                         if (demoStatus) {
                             demoStatus.className = 'status-msg error';
-                            demoStatus.textContent = 'Generation failed. Server might be waking up, please retry in a moment.';
+                            demoStatus.textContent = 'Generation error: ' + error.message;
                         }
                     } finally {
                         btnGenerate.disabled = false;
