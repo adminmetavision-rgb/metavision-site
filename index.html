@@ -479,7 +479,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const SPACE_ID = "marius500/metavision-tts-api";
+            const HF_HOST = "https://marius500-metavision-tts-api.hf.space";
 
             /* ===== THEME ===== */
             let currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -502,10 +502,7 @@
             }
             applyTheme();
 
-            /* ===== VOICES & SAMPLES =====
-               Kai turėsite RVC v2 sugeneruotą .mp3 failą (pvz., ikeltą į GitHub),
-               tiesiog įrašykite kelią į sampleUrl: 'samples/leopoldas.mp3'
-               Kol sampleUrl yra tuščias (''), puslapis generuos garsą gyvai per Hugging Face! */
+            /* ===== VOICES & SAMPLES ===== */
             const voices = [
                 { 
                     id: 'Leopoldas (Cartoon - Lithuanian)', 
@@ -676,46 +673,21 @@
                 fillVoiceSelect();
             }
 
-            /* ===== PATIKIMA GRADIO KLIENTO JUNGTIS (Išsprendžia Empty Audio Stream) ===== */
-            let gradioClientPromise = null;
-
-            async function getClient() {
-                if (!gradioClientPromise) {
-                    gradioClientPromise = (async () => {
-                        const { Client } = await import("https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js");
-                        return await Client.connect(SPACE_ID);
-                    })();
-                }
-                return gradioClientPromise;
-            }
-
+            /* ===== TIESIOGINĖ IR GREITA API JUNGTIS (Be jokių Gradio klaidų!) ===== */
             async function generateTTS(text, voiceId) {
-                try {
-                    const app = await getClient();
-                    const cleanText = text.slice(0, 300);
-
-                    // Išbandome abu galimus endpoint pavadinimus (/predict ir /generate_speech)
-                    let result = null;
-                    try {
-                        result = await app.predict("/predict", [cleanText, voiceId]);
-                    } catch (err1) {
-                        result = await app.predict("/generate_speech", [cleanText, voiceId]);
-                    }
-
-                    if (result && result.data && result.data[0]) {
-                        const item = result.data[0];
-                        if (typeof item === "string") return item;
-                        if (item.url) return item.url;
-                    }
-                    throw new Error("Server returned empty audio.");
-                } catch (err) {
-                    // Jei ryšys nutrūko, kitą kartą jungsis iš naujo
-                    gradioClientPromise = null;
-                    throw err;
+                const params = new URLSearchParams({
+                    text: text.slice(0, 300),
+                    voice: voiceId
+                });
+                const response = await fetch(`${HF_HOST}/tts?${params.toString()}`);
+                if (!response.ok) {
+                    throw new Error(`Server status: ${response.status}`);
                 }
+                const blob = await response.blob();
+                return URL.createObjectURL(blob);
             }
 
-            /* ===== KORTELIŲ GROTUVAS (Palaiko ir RVC .mp3 failus, ir gyvą TTS) ===== */
+            /* ===== KORTELIŲ GROTUVAS ===== */
             const sharedAudio = new Audio();
             let currentPlayingBtn = null;
 
@@ -738,7 +710,6 @@
                 if (voicesStatus) voicesStatus.textContent = '';
 
                 try {
-                    // Jei nurodytas iš anksto sugeneruotas RVC v2 failas (sampleUrl), groja jį iškart, kitaip generuoja gyvai
                     const audioUrl = voice.sampleUrl 
                         ? voice.sampleUrl 
                         : await generateTTS(voice.sampleText, voice.id);
