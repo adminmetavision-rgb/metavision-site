@@ -3,956 +3,595 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MetaVision Voice | AI Text to Speech & Retro Character Voice Cloning</title>
-    <meta name="description" content="MetaVision Voice turns text into natural-sounding speech and recreates classic animation, retro film, and custom character voices using Neural TTS and RVC v2 technology.">
-    <meta name="keywords" content="AI text to speech, Lithuanian TTS, lietuviškas balso generatorius, RVC v2 voice conversion, character voices, animation voiceover, MetaVision Voice">
-
-    <!-- Open Graph Tags -->
-    <meta property="og:title" content="MetaVision Voice | Neural TTS & Character Voice Studio">
-    <meta property="og:description" content="Turn text into natural-sounding speech or transform voices into classic animation and film characters.">
+    <title>MetaVision | See your process automated</title>
+    <meta name="description" content="Interactive demos of AI business automation: inbox triage, invoice processing and live monitoring. Built by a developer with 20+ years in manufacturing.">
+    <meta property="og:title" content="MetaVision | See your process automated">
+    <meta property="og:description" content="Watch three real automation workflows step by step, then estimate what they would save you.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://metavision.click">
-
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
 
     <style>
         :root {
-            --bg-color: #0f172a;
-            --surface-color: #1e293b;
-            --surface-hover: #334155;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-2: #273449;
+            --text: #f8fafc;
+            --muted: #94a3b8;
             --primary: #3b82f6;
             --primary-hover: #2563eb;
             --border: #334155;
-            --error: #ef4444;
-            --success: #10b981;
-            --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            --radius-md: 12px;
-            --radius-lg: 24px;
-            --transition: all 0.2s ease;
+            --ok: #10b981;
+            --warn: #f59e0b;
+            --bad: #ef4444;
+            --radius: 12px;
+            --radius-lg: 20px;
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         }
-
         [data-theme="light"] {
-            --bg-color: #f8fafc;
-            --surface-color: #ffffff;
-            --surface-hover: #f1f5f9;
-            --text-main: #0f172a;
-            --text-muted: #475569;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface-2: #f1f5f9;
+            --text: #0f172a;
+            --muted: #475569;
             --border: #e2e8f0;
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+        html { scroll-behavior: smooth; }
         body {
-            font-family: var(--font-stack);
-            background-color: var(--bg-color);
-            color: var(--text-main);
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
             line-height: 1.6;
             overflow-x: hidden;
-            transition: background-color var(--transition), color var(--transition);
         }
-
         a { color: inherit; text-decoration: none; }
-        ul { list-style: none; }
-
-        button {
-            cursor: pointer;
-            font-family: inherit;
-            border: none;
-            background: none;
-            color: inherit;
-        }
-
-        button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+        button { font-family: inherit; color: inherit; cursor: pointer; border: none; background: none; }
+        button:focus-visible, a:focus-visible, input:focus-visible {
             outline: 2px solid var(--primary);
             outline-offset: 2px;
         }
+        h1, h2, h3 { line-height: 1.2; font-weight: 700; }
+        h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); letter-spacing: -0.02em; }
+        h2 { font-size: clamp(1.7rem, 3.5vw, 2.3rem); margin-bottom: 0.75rem; }
+        h3 { font-size: 1.05rem; margin-bottom: 0.5rem; }
+        p { color: var(--muted); margin-bottom: 1rem; }
 
-        h1, h2, h3, h4 { line-height: 1.2; font-weight: 700; }
-        h1 { font-size: clamp(2.5rem, 5vw, 4rem); letter-spacing: -0.02em; }
-        h2 { font-size: clamp(2rem, 4vw, 2.5rem); margin-bottom: 1.5rem; text-align: center; }
-        h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
-        p { margin-bottom: 1rem; color: var(--text-muted); }
+        .container { width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 1.25rem; }
+        section { padding: 4.5rem 0; }
+        .section-head { text-align: center; max-width: 680px; margin: 0 auto 2.25rem; }
 
-        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
-        section { padding: 6rem 0; }
-
+        /* header */
         header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background-color: rgba(15, 23, 42, 0.85);
+            position: sticky; top: 0; z-index: 50;
+            background: color-mix(in srgb, var(--bg) 85%, transparent);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
         }
-        [data-theme="light"] header { background-color: rgba(248, 250, 252, 0.85); }
-
-        .header-content { display: flex; justify-content: space-between; align-items: center; height: 72px; }
-        .logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
+        .header-row { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 1rem; }
+        .logo { font-weight: 800; font-size: 1.25rem; letter-spacing: -0.02em; }
         .logo span { color: var(--primary); }
-
-        .nav-links { display: none; gap: 2rem; }
-        @media (min-width: 768px) { .nav-links { display: flex; } }
-        .nav-links a:hover { color: var(--primary); }
-
-        .header-actions { display: flex; align-items: center; gap: 1rem; }
+        nav { display: none; gap: 1.75rem; }
+        @media (min-width: 720px) { nav { display: flex; } }
+        nav a { color: var(--muted); font-size: 0.95rem; }
+        nav a:hover { color: var(--text); }
+        .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+        .icon-btn {
+            width: 38px; height: 38px; border-radius: 50%;
+            border: 1px solid var(--border); background: var(--surface);
+            display: inline-flex; align-items: center; justify-content: center; font-size: 1rem;
+        }
+        .icon-btn:hover { background: var(--surface-2); }
 
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.75rem 1.5rem;
-            border-radius: 999px;
-            font-weight: 600;
-            transition: var(--transition);
-            text-align: center;
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            padding: 0.7rem 1.4rem; border-radius: 999px; font-weight: 600; font-size: 0.95rem;
+            transition: background 0.2s ease, transform 0.2s ease;
         }
-        .btn-small { padding: 0.5rem 1rem; font-size: 0.875rem; }
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
-        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
-        .btn-secondary { background-color: var(--surface-color); border: 1px solid var(--border); }
-        .btn-secondary:hover { background-color: var(--surface-hover); }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-secondary { background: var(--surface); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--surface-2); }
+        .btn-small { padding: 0.45rem 1rem; font-size: 0.85rem; }
 
-        .icon-btn {
-            width: 40px;
-            height: 40px;
-            flex-shrink: 0;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--surface-color);
-            border: 1px solid var(--border);
-        }
-        .icon-btn:hover { background-color: var(--surface-hover); }
-        .icon-btn svg { width: 20px; height: 20px; fill: currentColor; }
-
-        .hero { text-align: center; padding: 8rem 0 6rem; }
-        .hero h1 { margin-bottom: 1.5rem; }
-        .hero p { font-size: 1.25rem; max-width: 680px; margin: 0 auto 2.5rem; }
-        .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
-
-        .demo-card {
-            background-color: var(--surface-color);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-            max-width: 800px;
-            margin: 0 auto;
+        /* hero */
+        .hero { text-align: center; padding: 5.5rem 0 3rem; }
+        .hero h1 { margin-bottom: 1.25rem; }
+        .hero p.lead { font-size: 1.15rem; max-width: 640px; margin: 0 auto 2rem; }
+        .hero-btns { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+        .proof { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-top: 2rem; }
+        .chip {
+            font-size: 0.8rem; font-weight: 600; padding: 0.3rem 0.75rem; border-radius: 999px;
+            background: var(--surface); border: 1px solid var(--border); color: var(--muted);
         }
 
-        .demo-controls { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1.5rem; }
-        @media (min-width: 600px) { .demo-controls { grid-template-columns: 1fr 1fr; } }
-
-        .input-group { display: flex; flex-direction: column; gap: 0.5rem; }
-        .input-group label { font-weight: 600; font-size: 0.875rem; }
-
-        select, textarea {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border-radius: var(--radius-md);
-            background-color: var(--bg-color);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            font-family: inherit;
-            font-size: 1rem;
+        /* demo */
+        .tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.5rem; }
+        .tab {
+            padding: 0.6rem 1.1rem; border-radius: 999px; font-weight: 600; font-size: 0.92rem;
+            background: var(--surface); border: 1px solid var(--border); color: var(--muted);
         }
-        textarea { resize: vertical; min-height: 120px; }
+        .tab:hover { color: var(--text); }
+        .tab[aria-selected="true"] { background: var(--primary); border-color: var(--primary); color: #fff; }
 
-        .char-count { text-align: right; font-size: 0.75rem; color: var(--text-muted); }
+        .stage {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.5rem;
+        }
+        .stage-top {
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem;
+        }
+        .stage-top p { margin: 0; font-size: 0.95rem; }
+        .stage-top .title { color: var(--text); font-weight: 700; font-size: 1.1rem; }
+        .recorded { font-size: 0.75rem; color: var(--muted); }
+        .cols { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        @media (min-width: 900px) { .cols { grid-template-columns: 1fr 1fr 1fr; } }
+        .panel {
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1rem; min-width: 0;
+        }
+        .panel > .label {
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+            text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem;
+        }
+        .mail-meta { font-size: 0.8rem; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 0.6rem; }
+        .mail-meta b { color: var(--text); }
+        .doc-text { font-size: 0.9rem; color: var(--text); }
+        .doc-text p { color: var(--text); margin-bottom: 0.6rem; }
 
-        .demo-actions { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; }
-        .status-msg { font-size: 0.875rem; text-align: center; min-height: 20px; margin: 0; }
-        .status-msg.error { color: var(--error); }
-        .status-msg.success { color: var(--success); }
+        .invoice { font-size: 0.82rem; }
+        .invoice .inv-head { display: flex; justify-content: space-between; gap: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
+        .invoice table, .out-table { width: 100%; border-collapse: collapse; }
+        .invoice td, .invoice th, .out-table td, .out-table th {
+            padding: 0.25rem 0.3rem; text-align: left; border-bottom: 1px solid var(--border); font-weight: 400; vertical-align: top;
+        }
+        .invoice th { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; }
+        .invoice .num, .out-table .num { text-align: right; font-family: var(--mono); white-space: nowrap; }
+        .invoice .total td { font-weight: 700; border-bottom: none; }
+        .out-table th { color: var(--muted); width: 38%; font-size: 0.78rem; }
+        .out-table td { font-family: var(--mono); font-size: 0.8rem; }
 
-        audio { width: 100%; height: 40px; margin-top: 1rem; }
+        .spark { width: 100%; height: auto; display: block; }
+        .spark .line { fill: none; stroke: var(--primary); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+        .spark .limit { stroke: var(--warn); stroke-width: 1; stroke-dasharray: 4 4; }
+        .spark text { fill: var(--muted); font-size: 10px; font-family: var(--font); }
+        .spark .flag { fill: var(--bad); }
 
-        .grid-3 { display: grid; grid-template-columns: 1fr; gap: 2rem; }
-        @media (min-width: 768px) { .grid-3 { grid-template-columns: repeat(3, 1fr); } }
+        /* steps */
+        .steps { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+        .step {
+            display: grid; grid-template-columns: 26px 1fr; gap: 0.6rem; align-items: start;
+            padding: 0.55rem 0.6rem; border-radius: 10px; border: 1px solid transparent;
+            opacity: 0.55; transition: opacity 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+        }
+        .step.running { opacity: 1; border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, transparent); }
+        .step.done { opacity: 1; }
+        .badge {
+            width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--muted);
+        }
+        .step.running .badge { border-color: var(--primary); border-top-color: transparent; animation: spin 0.8s linear infinite; }
+        .step.done .badge { background: var(--ok); border-color: var(--ok); color: #fff; }
+        .step .name { font-weight: 600; font-size: 0.92rem; }
+        .step .detail { font-size: 0.8rem; color: var(--muted); display: none; margin-top: 0.1rem; }
+        .step.done .detail { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .card {
-            background-color: var(--surface-color);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 2rem;
-            transition: var(--transition);
+        /* reveal */
+        [data-reveal] { opacity: 0.18; transition: opacity 0.4s ease; }
+        [data-reveal].on { opacity: 1; }
+
+        .out-block { margin-bottom: 0.9rem; }
+        .out-block:last-child { margin-bottom: 0; }
+        .out-block .sub { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.35rem; }
+        .bubble {
+            background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+            padding: 0.7rem 0.8rem; font-size: 0.88rem; color: var(--text);
+        }
+        .bubble.alert { border-color: var(--warn); }
+        .tag-ok { display: inline-block; font-size: 0.78rem; font-weight: 700; color: var(--ok); }
+
+        .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 1rem; }
+        .compare div {
+            background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 0.75rem 1rem; text-align: center;
+        }
+        .compare .k { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+        .compare .v { font-size: 1.15rem; font-weight: 800; }
+        .compare .auto .v { color: var(--ok); }
+        .fine { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 0.75rem; margin-bottom: 0; }
+
+        /* calculator */
+        .calc {
+            display: grid; grid-template-columns: 1fr; gap: 1.5rem; max-width: 880px; margin: 0 auto;
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.75rem;
+        }
+        @media (min-width: 760px) { .calc { grid-template-columns: 1fr 1fr; } }
+        .field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
+        .field label { font-weight: 600; font-size: 0.88rem; }
+        .field input[type="number"] {
+            padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text); font-size: 1rem; font-family: inherit; width: 100%;
+        }
+        .field input[type="range"] { width: 100%; accent-color: var(--primary); }
+        .result {
+            background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 1.25rem; display: flex; flex-direction: column; justify-content: center; text-align: center;
+        }
+        .result .big { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 800; color: var(--ok); line-height: 1.1; }
+        .result .row { margin-bottom: 1.1rem; }
+        .result .row:last-child { margin-bottom: 0; }
+        .result .cap { font-size: 0.85rem; color: var(--muted); }
+
+        /* about + contact */
+        .about { max-width: 720px; margin: 0 auto; text-align: center; }
+        .about p { font-size: 1.05rem; }
+        .contact { text-align: center; }
+        .contact .box {
+            max-width: 640px; margin: 0 auto; padding: 2.25rem 1.5rem;
+            background: color-mix(in srgb, var(--primary) 10%, transparent);
+            border: 1px solid var(--primary); border-radius: var(--radius-lg);
         }
 
-        .voice-card { display: flex; flex-direction: column; }
-        .voice-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
-        .voice-meta { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
-        .badge { background-color: var(--bg-color); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
-        .badge-accent { background-color: rgba(59, 130, 246, 0.2); color: var(--primary); border: 1px solid var(--primary); }
-        #voices-status { text-align: center; margin-top: 2rem; }
+        footer { border-top: 1px solid var(--border); padding: 2rem 0; text-align: center; }
+        footer p { margin: 0; font-size: 0.85rem; }
 
-        .feature-icon { margin-bottom: 1rem; color: var(--primary); }
-        .feature-icon svg { width: 32px; height: 32px; fill: currentColor; }
-
-        .pricing-card { text-align: center; display: flex; flex-direction: column; }
-        .pricing-card h3 { font-size: 1.5rem; }
-        .price { font-size: 3rem; font-weight: 800; margin: 1.5rem 0; }
-        .price span { font-size: 1rem; font-weight: normal; color: var(--text-muted); }
-        .price-tba { font-size: 1.5rem; font-weight: 700; margin: 2.25rem 0; color: var(--text-muted); }
-        .pricing-features { margin: 2rem 0; flex-grow: 1; }
-        .pricing-features li { margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; }
-        .pricing-features li:last-child { border-bottom: none; }
-        .pricing-card.featured { border-color: var(--primary); }
-        @media (min-width: 768px) { .pricing-card.featured { transform: scale(1.05); } }
-        .pricing-note { text-align: center; margin-top: 2rem; }
-
-        .narrow-section { max-width: 600px; margin: 0 auto; text-align: center; }
-
-        .responsible-box {
-            background-color: rgba(59, 130, 246, 0.1);
-            border: 1px solid var(--primary);
-            border-radius: var(--radius-md);
-            padding: 2rem;
-            text-align: left;
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .step, [data-reveal] { transition: none; }
+            .step.running .badge { animation: none; }
         }
-
-        .faq-item { border-bottom: 1px solid var(--border); }
-        .faq-question {
-            width: 100%;
-            text-align: left;
-            padding: 1.5rem 0;
-            font-size: 1.125rem;
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-        }
-        .faq-icon { flex-shrink: 0; transition: transform 0.3s ease; }
-        .faq-question[aria-expanded="true"] .faq-icon { transform: rotate(180deg); }
-        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-        .faq-answer-inner { padding-bottom: 1.5rem; color: var(--text-muted); text-align: left; }
-
-        footer { border-top: 1px solid var(--border); padding: 3rem 0; margin-top: 4rem; text-align: center; }
-        .footer-links { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-        .footer-links a:hover { color: var(--primary); }
-
-        .spin { animation: spin 1s linear infinite; display: inline-block; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        html { scroll-behavior: smooth; }
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="container header-content">
-            <a href="#" class="logo">MetaVision <span>Voice</span></a>
-            <nav class="nav-links" aria-label="Main">
-                <a href="#demo">Demo</a>
-                <a href="#voices">Voices</a>
-                <a href="#features">Features</a>
-                <a href="#pricing">Pricing</a>
-                <a href="#faq">FAQ</a>
-            </nav>
-            <div class="header-actions">
-                <a href="#demo" class="btn btn-primary btn-small">Try demo</a>
-                <button class="icon-btn" id="theme-toggle" aria-label="Switch color theme"></button>
+<header>
+    <div class="container header-row">
+        <a href="#top" class="logo">MetaVision <span>Automation</span></a>
+        <nav aria-label="Main">
+            <a href="#demos">Live demos</a>
+            <a href="#savings">Savings</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+        </nav>
+        <div class="header-actions">
+            <a href="#contact" class="btn btn-primary btn-small">Talk to us</a>
+            <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch color theme">☀</button>
+        </div>
+    </div>
+</header>
+
+<main id="top">
+    <section class="hero container">
+        <h1>See your process automated before you pay for anything</h1>
+        <p class="lead">Three real workflows, step by step: from a message, a document or a sensor reading to a finished result. Pick one, press Run, and estimate what it would save your team.</p>
+        <div class="hero-btns">
+            <a href="#demos" class="btn btn-primary">Watch a workflow</a>
+            <a href="#savings" class="btn btn-secondary">Estimate my savings</a>
+        </div>
+        <div class="proof" aria-label="Highlights">
+            <span class="chip">AI + classic automation</span>
+            <span class="chip">Works with email, sheets, PDFs, Telegram, APIs</span>
+            <span class="chip">20+ years of manufacturing experience</span>
+        </div>
+    </section>
+
+    <section id="demos" class="container">
+        <div class="section-head">
+            <h2>Three workflows, one pattern</h2>
+            <p>Input → AI steps → result. Every demo below shows a recorded run on sample data.</p>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Choose a workflow" id="tabs"></div>
+        <div class="stage" id="stage" aria-live="polite"></div>
+    </section>
+
+    <section id="savings" class="container">
+        <div class="section-head">
+            <h2>What could this save you?</h2>
+            <p>Enter a task someone does by hand every week. This is a rough estimate, not a promise.</p>
+        </div>
+        <div class="calc">
+            <div>
+                <div class="field">
+                    <label for="c-hours">Hours spent per week</label>
+                    <input type="number" id="c-hours" min="0" max="200" step="0.5" value="10">
+                </div>
+                <div class="field">
+                    <label for="c-rate">Cost of one working hour (€)</label>
+                    <input type="number" id="c-rate" min="0" max="500" step="1" value="25">
+                </div>
+                <div class="field" style="margin-bottom:0;">
+                    <label for="c-pct">Share that can be automated: <span id="c-pct-out">70</span>%</label>
+                    <input type="range" id="c-pct" min="10" max="95" step="5" value="70">
+                </div>
+            </div>
+            <div class="result" role="status" aria-live="polite">
+                <div class="row">
+                    <div class="big" id="r-hours">0 h</div>
+                    <div class="cap">saved per month</div>
+                </div>
+                <div class="row">
+                    <div class="big" id="r-money">€0</div>
+                    <div class="cap">per month, about <span id="r-year">€0</span> per year</div>
+                </div>
             </div>
         </div>
-    </header>
+    </section>
 
-    <main>
-        <section class="hero container" id="hero">
-            <h1>Turn text into natural-sounding speech</h1>
-            <p>Voiceovers for videos, courses, apps, classic cartoons and audiobooks. Powered by Neural TTS and RVC v2 expressive character voice conversion.</p>
-            <div class="hero-btns">
-                <a href="#demo" class="btn btn-primary">Try Live TTS</a>
-                <a href="#voices" class="btn btn-secondary">Explore Character Voices</a>
-            </div>
-        </section>
-
-        <section class="container" id="demo">
-            <h2>Try Live Neural TTS</h2>
-            <div class="demo-card">
-                <div class="demo-controls">
-                    <div class="input-group">
-                        <label for="demo-lang">Language</label>
-                        <select id="demo-lang">
-                            <option value="lt-LT">Lithuanian</option>
-                            <option value="en-US">English (US)</option>
-                            <option value="en-GB">English (UK)</option>
-                            <option value="es-ES">Spanish</option>
-                            <option value="fr-FR">French</option>
-                            <option value="de-DE">German</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label for="demo-voice">Voice</label>
-                        <select id="demo-voice"></select>
-                    </div>
-                </div>
-
-                <div class="input-group" id="demo-text-group">
-                    <label for="demo-text">Text</label>
-                    <textarea id="demo-text" maxlength="300" placeholder="Type the text you want to hear.">Vaikai, gyvenkime draugiškai! Juk pasaulyje tiek daug gražių dalykų, kai šalia geri draugai.</textarea>
-                    <div class="char-count"><span id="char-current">92</span> / 300</div>
-                </div>
-
-                <div class="demo-actions">
-                    <button id="btn-generate" class="btn btn-primary">
-                        <span class="btn-text">Generate speech</span>
-                        <svg class="btn-icon spin" style="display:none; width:18px; height:18px; margin-left:8px; fill:currentColor;" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M12 2v4c5.52 0 10 4.48 10 10h4c0-7.73-6.27-14-14-14z"/>
-                        </svg>
-                    </button>
-                    <p id="demo-status" class="status-msg" role="status" aria-live="polite"></p>
-                    <audio id="demo-audio" controls style="display: none;">
-                        Your browser does not support the audio element.
-                    </audio>
-                </div>
-            </div>
-        </section>
-
-        <section class="container" id="voices">
-            <h2>Sample voices & Character Presets</h2>
-            <p style="text-align: center; margin-bottom: 3rem;">Listen to standard neural voices and animated character presets. Custom RVC v2 actor intonations coming soon.</p>
-            <div class="grid-3" id="voice-grid"></div>
-            <p id="voices-status" class="status-msg" role="status" aria-live="polite"></p>
-        </section>
-
-        <section class="container" id="features">
-            <h2>What you will be able to do</h2>
-            <div class="grid-3">
-                <div class="card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                    </div>
-                    <h3>Natural-sounding voices</h3>
-                    <p>Pick a voice, paste your text and generate clean narration in seconds.</p>
-                </div>
-                <div class="card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0-2c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0 7c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm-6 4c.22-.72 3.31-2 6-2 2.7 0 5.76 1.29 6 2H6z"/></svg>
-                    </div>
-                    <h3>RVC v2 Character Voices <span class="badge badge-accent">New</span></h3>
-                    <p>Speech-to-Speech conversion that preserves 100% real human acting intonations with nostalgic retro & animation voice timbres.</p>
-                </div>
-                <div class="card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.09 13.36 4 12.69 4 12s.09-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2 0-.68.07-1.35.16-2h4.68c.09.65.16 1.32.16 2 0 .68-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2 0-.68-.06-1.34-.14-2h3.38c.17.64.26 1.31.26 2s-.09 1.36-.26 2h-3.38z"/></svg>
-                    </div>
-                    <h3>20+ Languages</h3>
-                    <p>Support for Lithuanian, English, Spanish, French, German and more.</p>
-                </div>
-                <div class="card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                    </div>
-                    <h3>Simple MP3 downloads</h3>
-                    <p>Get your audio as a standard MP3 file, ready for any video or audio editor.</p>
-                </div>
-                <div class="card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
-                    </div>
-                    <h3>API <span class="badge">Live Test</span></h3>
-                    <p>Generate speech directly from your own app or automated workflow.</p>
-                </div>
-                <div class="card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
-                    </div>
-                    <h3>Custom Studio Projects</h3>
-                    <p>Need voiceovers for classic animation restoration, indie games, or film dubbing? Contact us for custom RVC voice models.</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="container" id="use-cases">
-            <h2>Made for</h2>
-            <div class="grid-3">
-                <div class="card"><h3>Animation & Retro Dubbing</h3><p>Recreate iconic cartoon and classic film narration styles with real actor emotions.</p></div>
-                <div class="card"><h3>Content creators</h3><p>Voiceovers for YouTube, TikTok and podcasts without studio equipment.</p></div>
-                <div class="card"><h3>E-learning & Courses</h3><p>Clear multilingual narration for training material and presentations.</p></div>
-                <div class="card"><h3>Audiobooks & Stories</h3><p>Turn fairy tales and long-form text into expressive chapters.</p></div>
-                <div class="card"><h3>Indie Games & Apps</h3><p>Distinctive character lines and in-app voice interactions.</p></div>
-                <div class="card"><h3>Accessibility</h3><p>Read-aloud audio for websites, articles and documents.</p></div>
-            </div>
-        </section>
-
-        <section class="container" id="pricing">
-            <h2>Pricing</h2>
-            <div class="grid-3">
-                <div class="card pricing-card">
-                    <h3>Free</h3>
-                    <div class="price">$0<span>/mo</span></div>
-                    <ul class="pricing-features">
-                        <li>Live Neural TTS demo</li>
-                        <li>Personal, non-commercial use</li>
-                        <li>Standard & preset voices</li>
-                    </ul>
-                    <a href="#demo" class="btn btn-secondary">Try now</a>
-                </div>
-                <div class="card pricing-card featured">
-                    <h3>Creator & RVC Studio</h3>
-                    <div class="price-tba">Custom / Early Access</div>
-                    <ul class="pricing-features">
-                        <li>RVC v2 expressive character models</li>
-                        <li>Real human intonation transfer</li>
-                        <li>Commercial rights included</li>
-                    </ul>
-                    <a href="#updates" class="btn btn-primary">Request access</a>
-                </div>
-                <div class="card pricing-card">
-                    <h3>Pro & Enterprise</h3>
-                    <div class="price-tba">Custom Project</div>
-                    <ul class="pricing-features">
-                        <li>Custom voice training for studios</li>
-                        <li>Animation & film dubbing pipelines</li>
-                        <li>Full API integration</li>
-                    </ul>
-                    <a href="#updates" class="btn btn-secondary">Contact us</a>
-                </div>
-            </div>
-        </section>
-
-        <section class="container" id="updates">
-            <div class="narrow-section">
-                <h2>Work with MetaVision Voice</h2>
-                <p>Developing an animation project, game, or video series? Write to us to test our custom RVC v2 character voices or discuss collaboration.</p>
-                <a id="contact-btn" href="mailto:admin.metavision@gmail.com" class="btn btn-primary">Email us: admin.metavision@gmail.com</a>
-            </div>
-        </section>
-
-        <section class="container" id="responsible-use">
-            <div class="narrow-section">
-                <h2>Responsible use</h2>
-                <div class="responsible-box">
-                    <p><strong>Consent:</strong> custom voice cloning and RVC models require verified permission for commercial use.</p>
-                    <p><strong>Artistic Tribute & Restoration:</strong> our retro character presets are designed to showcase expressive AI voice synthesis for creative storytelling and cultural preservation.</p>
-                    <p style="margin-bottom: 0;"><strong>Not allowed:</strong> impersonation, fraud and misleading content.</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="container" id="faq">
-            <div class="narrow-section">
-                <h2>Questions</h2>
-                <div class="faq-accordion">
-                    <div class="faq-item">
-                        <button class="faq-question" aria-expanded="false" aria-controls="faq-a1">
-                            How do you achieve real cartoon & film intonations?
-                            <svg class="faq-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                        </button>
-                        <div class="faq-answer" id="faq-a1"><div class="faq-answer-inner">We combine standard Neural Text-to-Speech (for fast text generation) with RVC v2 (Retrieval-based Voice Conversion). With RVC v2, a human records the line with authentic emotion, pauses, and acting, and our AI transforms the voice timbre into the target character.</div></div>
-                    </div>
-                    <div class="faq-item">
-                        <button class="faq-question" aria-expanded="false" aria-controls="faq-a2">
-                            Which languages are supported?
-                            <svg class="faq-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                        </button>
-                        <div class="faq-answer" id="faq-a2"><div class="faq-answer-inner">Our engine supports 20+ languages including Lithuanian, English, Spanish, French, and German.</div></div>
-                    </div>
-                    <div class="faq-item">
-                        <button class="faq-question" aria-expanded="false" aria-controls="faq-a3">
-                            Can we order custom voices for our animation or film project?
-                            <svg class="faq-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                        </button>
-                        <div class="faq-answer" id="faq-a3"><div class="faq-answer-inner">Yes! Contact us at admin.metavision@gmail.com with your project details and we can train or adapt custom expressive voices for your characters.</div></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container">
-            <div class="footer-links">
-                <a href="#demo">Demo</a>
-                <a href="#voices">Voices</a>
-                <a href="#features">Features</a>
-                <a href="mailto:admin.metavision@gmail.com">admin.metavision@gmail.com</a>
-            </div>
-            <p>© 2026 MetaVision. All rights reserved.</p>
+    <section id="about" class="container">
+        <div class="about">
+            <h2>Built by someone who has worked on the shop floor</h2>
+            <p>MetaVision is run by a developer with more than 20 years in production and CNC technology, now building AI and automation tools. That means workflows are designed around how real businesses operate: messy inputs, strict deadlines, and people who have no time to learn new software.</p>
         </div>
-    </footer>
+    </section>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const HF_HOST = "https://marius500-metavision-tts-api.hf.space";
+    <section id="contact" class="container contact">
+        <div class="box">
+            <h2>Have a process in mind?</h2>
+            <p>Describe it in two or three sentences. You will get a short plan and an honest answer on whether automation makes sense.</p>
+            <a class="btn btn-primary" href="mailto:admin.metavision@gmail.com?subject=Automation%20demo%20request">Email admin.metavision@gmail.com</a>
+        </div>
+    </section>
+</main>
 
-            /* ===== THEME ===== */
-            let currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            const htmlEl = document.documentElement;
-            const themeBtn = document.getElementById('theme-toggle');
-            const sunIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1z"/></svg>';
-            const moonIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>';
+<footer>
+    <div class="container">
+        <p>© 2026 MetaVision. All demos use sample data and recorded runs. Timings and savings are illustrative.</p>
+    </div>
+</footer>
 
-            function applyTheme() {
-                htmlEl.setAttribute('data-theme', currentTheme);
-                if (themeBtn) {
-                    themeBtn.innerHTML = currentTheme === 'dark' ? sunIcon : moonIcon;
-                }
-            }
-            if (themeBtn) {
-                themeBtn.addEventListener('click', () => {
-                    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                    applyTheme();
-                });
-            }
-            applyTheme();
+<script>
+document.addEventListener('DOMContentLoaded', function () {
 
-            /* ===== VOICES & SAMPLES ===== */
-            const voices = [
-                { 
-                    id: 'Leopoldas (Cartoon - Lithuanian)', 
-                    name: 'Katinas Leopoldas', 
-                    gender: 'Cartoon', 
-                    lang: 'lt-LT', 
-                    accent: 'Lithuanian Animation', 
-                    desc: 'Šiltas, taikus ir draugiškas klasikinės animacijos personažo balsas: „Vaikai, gyvenkime draugiškai!“',
-                    sampleText: 'Vaikai, gyvenkime draugiškai! Juk pasaulyje tiek daug gražių dalykų, kai šalia geri draugai.',
-                    sampleUrl: '', 
-                    showInGrid: true
-                },
-                { 
-                    id: 'Ona (Female - Lithuanian)', 
-                    name: 'Ona', 
-                    gender: 'Female', 
-                    lang: 'lt-LT', 
-                    accent: 'Lithuanian', 
-                    desc: 'Natūralus ir ramus lietuviškas moteriškas balsas.',
-                    sampleText: 'Sveiki! Tai yra MetaVision natūralaus lietuviško balso pavyzdys.',
-                    sampleUrl: '',
-                    showInGrid: true
-                },
-                { 
-                    id: 'Leonas (Male - Lithuanian)', 
-                    name: 'Leonas', 
-                    gender: 'Male', 
-                    lang: 'lt-LT', 
-                    accent: 'Lithuanian', 
-                    desc: 'Gilus ir aiškus lietuviškas vyriškas balsas.',
-                    sampleText: 'Sveiki! Aš esu Leonas. Galiu įgarsinti jūsų vaizdo įrašus, mokymus ir audioknygas.',
-                    sampleUrl: '',
-                    showInGrid: true
-                },
-                { 
-                    id: 'Peliukas (Cartoon - Lithuanian)', 
-                    name: 'Išdykęs Peliukas', 
-                    gender: 'Cartoon', 
-                    lang: 'lt-LT', 
-                    accent: 'Lithuanian Animation', 
-                    desc: 'Greitas ir žaismingas animacinio herojaus balsas.',
-                    sampleText: 'Ei, Leopoldai! Išeik, bailiuk! Mes vėl sugalvojome naują pokštą!',
-                    sampleUrl: '',
-                    showInGrid: false
-                },
-                { 
-                    id: 'Pasakų Senelis (Storyteller - LT)', 
-                    name: 'Pasakų Senelis', 
-                    gender: 'Storyteller', 
-                    lang: 'lt-LT', 
-                    accent: 'Lithuanian', 
-                    desc: 'Gilus ir lėtas pasakų bei istorijų pasakotojo balsas.',
-                    sampleText: 'Seniai, labai seniai, už devynių jūrų ir devynių kalnų, stovėjo stebuklinga karalystė.',
-                    sampleUrl: '',
-                    showInGrid: false
-                },
-                { 
-                    id: 'Aria (Female - US)', 
-                    name: 'Aria', 
-                    gender: 'Female', 
-                    lang: 'en-US', 
-                    accent: 'US English', 
-                    desc: 'Warm and calm.',
-                    sampleText: 'Hello! This is a voice preview for Aria from MetaVision.',
-                    sampleUrl: '',
-                    showInGrid: true
-                },
-                { 
-                    id: 'Marcus (Male - US)', 
-                    name: 'Marcus', 
-                    gender: 'Male', 
-                    lang: 'en-US', 
-                    accent: 'US English', 
-                    desc: 'Deep and steady.',
-                    sampleText: 'Hello! This is a voice preview for Marcus from MetaVision.',
-                    sampleUrl: '',
-                    showInGrid: true
-                },
-                { 
-                    id: 'Chloe (Female - UK)', 
-                    name: 'Chloe', 
-                    gender: 'Female', 
-                    lang: 'en-GB', 
-                    accent: 'UK English', 
-                    desc: 'Clear and crisp.',
-                    sampleText: 'Hello! This is a voice preview for Chloe from MetaVision.',
-                    sampleUrl: '',
-                    showInGrid: true
-                },
-                { 
-                    id: 'Mateo (Male - Spanish)', 
-                    name: 'Mateo', 
-                    gender: 'Male', 
-                    lang: 'es-ES', 
-                    accent: 'Spanish', 
-                    desc: 'Lively and friendly.',
-                    sampleText: '¡Hola! Esta es una muestra de voz de Mateo para MetaVision.',
-                    sampleUrl: '',
-                    showInGrid: true
-                },
-                { 
-                    id: 'Sophie (Female - French)', 
-                    name: 'Sophie', 
-                    gender: 'Female', 
-                    lang: 'fr-FR', 
-                    accent: 'French', 
-                    desc: 'Soft and even.',
-                    sampleText: 'Bonjour ! Ceci est un aperçu vocal de Sophie pour MetaVision.',
-                    sampleUrl: '',
-                    showInGrid: true
-                },
-                { 
-                    id: 'Klaus (Male - German)', 
-                    name: 'Klaus', 
-                    gender: 'Male', 
-                    lang: 'de-DE', 
-                    accent: 'German', 
-                    desc: 'Clear and informative.',
-                    sampleText: 'Hallo! Dies ist eine Sprachvorschau von Klaus für MetaVision.',
-                    sampleUrl: '',
-                    showInGrid: true
-                }
-            ];
+    /* ===== THEME ===== */
+    var root = document.documentElement;
+    var themeBtn = document.getElementById('theme-toggle');
+    var theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    function applyTheme() {
+        root.setAttribute('data-theme', theme);
+        themeBtn.textContent = theme === 'dark' ? '☀' : '☾';
+    }
+    themeBtn.addEventListener('click', function () {
+        theme = theme === 'dark' ? 'light' : 'dark';
+        applyTheme();
+    });
+    applyTheme();
 
-            const playIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
-            const pauseIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+    /* ===== DEMO DATA ===== */
+    var temps = [41, 41, 42, 41, 42, 43, 43, 44, 45, 46, 47, 48, 50, 51, 52, 54, 55, 56, 57, 58];
 
-            const demoLangSelect = document.getElementById('demo-lang');
-            const demoVoiceSelect = document.getElementById('demo-voice');
-            const voiceGrid = document.getElementById('voice-grid');
-            const voicesStatus = document.getElementById('voices-status');
+    function sparkSVG() {
+        var w = 300, h = 120, padL = 30, padR = 8, padT = 10, padB = 18;
+        var min = 38, max = 62;
+        function x(i) { return padL + (w - padL - padR) * i / (temps.length - 1); }
+        function y(v) { return padT + (h - padT - padB) * (1 - (v - min) / (max - min)); }
+        var pts = temps.map(function (v, i) { return x(i).toFixed(1) + ',' + y(v).toFixed(1); }).join(' ');
+        var ly = y(55).toFixed(1);
+        var lastX = x(temps.length - 1).toFixed(1);
+        var lastY = y(temps[temps.length - 1]).toFixed(1);
+        return '<svg class="spark" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="Spindle temperature rising from 41 to 58 degrees Celsius over 20 minutes">' +
+            '<line class="limit" x1="' + padL + '" x2="' + (w - padR) + '" y1="' + ly + '" y2="' + ly + '"></line>' +
+            '<text x="2" y="' + (parseFloat(ly) + 3) + '">55°</text>' +
+            '<text x="2" y="' + (y(41) + 3).toFixed(1) + '">41°</text>' +
+            '<polyline class="line" points="' + pts + '"></polyline>' +
+            '<g data-reveal="1"><circle class="flag" cx="' + lastX + '" cy="' + lastY + '" r="5"></circle>' +
+            '<text x="' + (parseFloat(lastX) - 74) + '" y="' + (parseFloat(lastY) - 10) + '">58° above limit</text></g>' +
+            '<text x="' + padL + '" y="' + (h - 4) + '">20 min ago</text>' +
+            '<text x="' + (w - padR - 22) + '" y="' + (h - 4) + '">now</text>' +
+            '</svg>';
+    }
 
-            if (voiceGrid) {
-                voiceGrid.innerHTML = '';
-                voices.filter(v => v.showInGrid).forEach(voice => {
-                    const card = document.createElement('div');
-                    card.className = 'card voice-card';
-                    card.innerHTML = `
-                        <div class="voice-header">
-                            <div>
-                                <h3>${voice.name}</h3>
-                                <div class="voice-meta">
-                                    <span class="badge ${voice.gender === 'Cartoon' ? 'badge-accent' : ''}">${voice.gender}</span>
-                                    <span class="badge">${voice.accent}</span>
-                                </div>
-                            </div>
-                            <button class="icon-btn voice-play-btn" data-id="${voice.id}" aria-label="Play sample for ${voice.name}">${playIcon}</button>
-                        </div>
-                        <p>${voice.desc}</p>
-                    `;
-                    voiceGrid.appendChild(card);
-                });
-            }
+    var demos = [
+        {
+            id: 'inbox',
+            tab: 'Inbox triage',
+            title: 'Customer message → classified, answered, logged',
+            inputLabel: 'Input · incoming email',
+            input: function () {
+                return '<div class="mail-meta"><b>From:</b> anna@northwind-shop.example<br><b>Subject:</b> Order #4821 arrived damaged</div>' +
+                    '<div class="doc-text"><p>Hi, my desk lamp arrived today with a cracked lid. The photo is attached. Can you send a replacement? I need it before next week.</p><p>Thanks, Anna</p></div>';
+            },
+            steps: [
+                { name: 'Read the message', detail: 'Customer email, 1 photo attached' },
+                { name: 'Classify it', detail: 'Support · damaged item · priority high' },
+                { name: 'Look up the order', detail: 'Order #4821 · shipped 2026-10-09 · 1× desk lamp' },
+                { name: 'Draft the reply', detail: 'Apology, replacement offered, tone matched' },
+                { name: 'Log it', detail: 'Row added to the support sheet' }
+            ],
+            output: function () {
+                return '<div class="out-block" data-reveal="3"><div class="sub">Draft reply (ready for approval)</div>' +
+                    '<div class="bubble">Hi Anna, I’m sorry your lamp arrived with a cracked lid. A free replacement is on its way: it ships tomorrow and you will get the tracking number by email. There is no need to send the damaged one back.<br><br>Best regards,<br>Support team</div></div>' +
+                    '<div class="out-block" data-reveal="4"><div class="sub">Support sheet</div>' +
+                    '<table class="out-table"><tr><th>Date</th><td>2026-10-20</td></tr><tr><th>Order</th><td>#4821</td></tr><tr><th>Type</th><td>Damaged item</td></tr><tr><th>Priority</th><td>High</td></tr><tr><th>Action</th><td>Replacement, draft ready</td></tr></table></div>';
+            },
+            manual: '≈ 6 min per message',
+            auto: '≈ 10 seconds'
+        },
+        {
+            id: 'invoice',
+            tab: 'Invoice to spreadsheet',
+            title: 'Supplier invoice → checked data in your sheet',
+            inputLabel: 'Input · invoice (sample)',
+            input: function () {
+                return '<div class="invoice">' +
+                    '<div class="inv-head"><div><b>Nordic Profile Supply UAB</b><br>Invoice NPS-2026-0417</div><div>2026-10-14</div></div>' +
+                    '<table><tr><th>Item</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Sum</th></tr>' +
+                    '<tr><td>Aluminium profile 40×40</td><td class="num">12</td><td class="num">18.50</td><td class="num">222.00</td></tr>' +
+                    '<tr><td>Corner connector set</td><td class="num">4</td><td class="num">9.25</td><td class="num">37.00</td></tr>' +
+                    '<tr><td colspan="3">Subtotal</td><td class="num">259.00</td></tr>' +
+                    '<tr><td colspan="3">VAT 21%</td><td class="num">54.39</td></tr>' +
+                    '<tr class="total"><td colspan="3">Total EUR</td><td class="num">313.39</td></tr></table></div>';
+            },
+            steps: [
+                { name: 'Receive the file', detail: 'invoice_0417.pdf, 1 page' },
+                { name: 'Read the text', detail: 'Text and table recognised' },
+                { name: 'Extract the fields', detail: 'Supplier, number, date, lines, VAT, total' },
+                { name: 'Check the maths', detail: '259.00 + 54.39 VAT = 313.39 ✓' },
+                { name: 'Add to the sheet', detail: 'Row 118 added, flagged for approval' }
+            ],
+            output: function () {
+                return '<div class="out-block" data-reveal="2"><div class="sub">Extracted fields</div>' +
+                    '<table class="out-table"><tr><th>Supplier</th><td>Nordic Profile Supply UAB</td></tr><tr><th>Invoice no.</th><td>NPS-2026-0417</td></tr><tr><th>Date</th><td>2026-10-14</td></tr><tr><th>Net</th><td>259.00 EUR</td></tr><tr><th>VAT 21%</th><td>54.39 EUR</td></tr><tr><th>Total</th><td>313.39 EUR</td></tr></table></div>' +
+                    '<div class="out-block" data-reveal="3"><div class="sub">Validation</div><span class="tag-ok">✓ Lines add up, VAT rate matches</span></div>' +
+                    '<div class="out-block" data-reveal="4"><div class="sub">Accounting sheet</div><div class="bubble">Row 118 · status: <b>awaiting approval</b></div></div>';
+            },
+            manual: '≈ 4 min per invoice',
+            auto: '≈ 12 seconds'
+        },
+        {
+            id: 'monitor',
+            tab: 'Monitor & alert',
+            title: 'Sensor or price feed → plain-language alert',
+            inputLabel: 'Input · Line 3 spindle temperature',
+            input: function () {
+                return sparkSVG() + '<p style="font-size:0.8rem;margin:0.5rem 0 0;">One reading per minute. The same pattern works for prices, stock levels or website uptime.</p>';
+            },
+            steps: [
+                { name: 'Read the sensor', detail: 'Every 60 seconds, Line 3 spindle' },
+                { name: 'Detect the anomaly', detail: 'Above 55 °C and rising faster than normal' },
+                { name: 'Explain in plain words', detail: 'Short summary with a likely cause' },
+                { name: 'Send the alert', detail: 'Telegram message to the shift lead' }
+            ],
+            output: function () {
+                return '<div class="out-block" data-reveal="2"><div class="sub">AI summary (example text)</div>' +
+                    '<div class="bubble alert">⚠ Line 3 spindle: <b>58 °C</b> (limit 55 °C). The temperature climbed steadily from 41 °C over the last 19 minutes.<br><br>Likely cause: low coolant flow or a dull tool.<br>Suggested: check the coolant level, reduce feed by 10%, inspect the tool.</div></div>' +
+                    '<div class="out-block" data-reveal="3"><div class="sub">Delivery</div><span class="tag-ok">✓ Sent to Telegram · shift lead</span></div>';
+            },
+            manual: 'Someone has to keep watching',
+            auto: 'Alert within a minute'
+        }
+    ];
 
-            function fillVoiceSelect() {
-                if (!demoLangSelect || !demoVoiceSelect) return;
-                const lang = demoLangSelect.value;
-                demoVoiceSelect.innerHTML = '';
-                voices.filter(v => v.lang === lang).forEach(v => {
-                    const o = document.createElement('option');
-                    o.value = v.id;
-                    o.textContent = v.name + ' (' + v.gender + ')';
-                    demoVoiceSelect.appendChild(o);
-                });
-            }
-            if (demoLangSelect) {
-                demoLangSelect.addEventListener('change', fillVoiceSelect);
-                fillVoiceSelect();
-            }
+    /* ===== DEMO RENDERING ===== */
+    var tabsEl = document.getElementById('tabs');
+    var stage = document.getElementById('stage');
+    var current = 0;
+    var timers = [];
+    var running = false;
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-            /* ===== TTS API: Gradio /call/predict (2 zingsniai) -> audio/mpeg ===== */
-            async function fetchGradioAudio(text, voiceId, signal) {
-                // Gradio 5: /gradio_api/call/predict ; Gradio 4: /call/predict
-                const bases = [HF_HOST + '/gradio_api', HF_HOST];
-                let lastErr;
-                for (const base of bases) {
-                    try {
-                        const start = await fetch(base + '/call/predict', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ data: [text, voiceId] }),
-                            signal: signal
-                        });
-                        if (start.status === 404) {
-                            lastErr = new Error('HTTP 404 (' + base + ')');
-                            continue;
-                        }
-                        if (!start.ok) {
-                            const d = await start.text().catch(() => '');
-                            const e = new Error('HTTP ' + start.status + (d ? ': ' + d.slice(0, 200) : ''));
-                            e.status = start.status;
-                            throw e;
-                        }
-                        const startJson = await start.json();
-                        const eventId = startJson && startJson.event_id;
-                        if (!eventId) throw new Error('No event_id from server');
+    function clearTimers() {
+        timers.forEach(clearTimeout);
+        timers = [];
+        running = false;
+    }
 
-                        const res = await fetch(base + '/call/predict/' + eventId, { signal: signal });
-                        if (!res.ok) {
-                            const e = new Error('HTTP ' + res.status);
-                            e.status = res.status;
-                            throw e;
-                        }
-                        const body = await res.text();
-
-                        let currentEvent = null;
-                        let finalEvent = null;
-                        let finalData = null;
-                        for (const line of body.split('\n')) {
-                            if (line.startsWith('event:')) {
-                                currentEvent = line.slice(6).trim();
-                            } else if (line.startsWith('data:') && (currentEvent === 'complete' || currentEvent === 'error')) {
-                                finalEvent = currentEvent;
-                                finalData = line.slice(5).trim();
-                            }
-                        }
-                        if (finalEvent !== 'complete') {
-                            throw new Error('TTS error: ' + (finalData || 'unknown'));
-                        }
-
-                        const out = JSON.parse(finalData);
-                        const file = Array.isArray(out) ? out[0] : out;
-                        const fileUrl = file && (file.url || (file.path ? base + '/file=' + file.path : null));
-                        if (!fileUrl) throw new Error('No audio file in response');
-
-                        const audioRes = await fetch(fileUrl, { signal: signal });
-                        if (!audioRes.ok) {
-                            const e = new Error('HTTP ' + audioRes.status + ' (audio file)');
-                            e.status = audioRes.status;
-                            throw e;
-                        }
-                        const blob = await audioRes.blob();
-                        if (!blob.size) throw new Error('Empty audio response');
-                        return blob;
-                    } catch (e) {
-                        lastErr = e;
-                        if (e.name === 'AbortError' || e.status) throw e;
-                    }
-                }
-                throw lastErr || new Error('Server unavailable');
-            }
-
-            const ttsCache = new Map();
-            const REQUEST_TIMEOUT_MS = 90000;   // free HF Space may need up to ~1 min to wake up
-            const MAX_RETRIES = 2;
-            const SLOW_NOTICE_MS = 8000;
-
-            function describeError(err) {
-                if (err && err.name === 'AbortError') {
-                    return 'Request timed out. The server may be waking up, please try again.';
-                }
-                if (err && err.name === 'TypeError') {
-                    return 'Cannot reach the server (network or CORS error). Check that the Space is Running.';
-                }
-                return (err && err.message) ? err.message : 'Server unavailable';
-            }
-
-            async function generateTTS(text, voiceId, onSlow) {
-                const cleanText = String(text || '').trim().slice(0, 300);
-                if (!cleanText) throw new Error('Empty text');
-
-                const cacheKey = voiceId + '||' + cleanText;
-                if (ttsCache.has(cacheKey)) return ttsCache.get(cacheKey);
-
-                let lastError;
-                for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-                    const controller = new AbortController();
-                    const timeoutTimer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-                    const slowTimer = onSlow ? setTimeout(onSlow, SLOW_NOTICE_MS) : null;
-
-                    try {
-                        const blob = await fetchGradioAudio(cleanText, voiceId, controller.signal);
-
-                        const url = URL.createObjectURL(blob);
-                        ttsCache.set(cacheKey, url);
-                        return url;
-                    } catch (err) {
-                        lastError = err;
-                        // No point retrying client errors (4xx)
-                        if (err.status && err.status >= 400 && err.status < 500) break;
-                        if (attempt < MAX_RETRIES) {
-                            await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
-                        }
-                    } finally {
-                        clearTimeout(timeoutTimer);
-                        if (slowTimer) clearTimeout(slowTimer);
-                    }
-                }
-
-                const finalErr = new Error(describeError(lastError));
-                finalErr.cause = lastError;
-                throw finalErr;
-            }
-
-            /* ===== KORTELIŲ GROTUVAS ===== */
-            const sharedAudio = new Audio();
-            let currentPlayingBtn = null;
-
-            function resetAllPlayButtons() {
-                document.querySelectorAll('.voice-play-btn').forEach(b => b.innerHTML = playIcon);
-            }
-
-            document.addEventListener('click', async (e) => {
-                const btn = e.target.closest('.voice-play-btn');
-                if (!btn) return;
-
-                const voiceId = btn.dataset.id;
-                const voice = voices.find(v => v.id === voiceId);
-                if (!voice) return;
-
-                // Toggle pause on the same card
-                if (currentPlayingBtn === btn && !sharedAudio.paused) {
-                    sharedAudio.pause();
-                    btn.innerHTML = playIcon;
-                    return;
-                }
-
-                sharedAudio.pause();
-                resetAllPlayButtons();
-                currentPlayingBtn = null;
-                btn.innerHTML = '<span class="spin">⏳</span>';
-                btn.disabled = true;
-                if (voicesStatus) {
-                    voicesStatus.className = 'status-msg';
-                    voicesStatus.textContent = '';
-                }
-
-                try {
-                    const audioUrl = voice.sampleUrl 
-                        ? voice.sampleUrl 
-                        : await generateTTS(voice.sampleText, voice.id, () => {
-                            if (voicesStatus) {
-                                voicesStatus.className = 'status-msg';
-                                voicesStatus.textContent = 'Waking up the voice server, this can take up to a minute...';
-                            }
-                        });
-
-                    sharedAudio.src = audioUrl;
-                    await sharedAudio.play();
-                    btn.innerHTML = pauseIcon;
-                    currentPlayingBtn = btn;
-                    if (voicesStatus) voicesStatus.textContent = '';
-                } catch (err) {
-                    console.error("Card playback error:", err);
-                    btn.innerHTML = playIcon;
-                    if (voicesStatus) {
-                        voicesStatus.className = 'status-msg error';
-                        voicesStatus.textContent = 'Nepavyko paleisti garso pavyzdžio: ' + (err.message || 'serveris nepasiekiamas');
-                    }
-                } finally {
-                    btn.disabled = false;
-                }
+    function renderTabs() {
+        tabsEl.innerHTML = '';
+        demos.forEach(function (d, i) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'tab';
+            b.setAttribute('role', 'tab');
+            b.setAttribute('aria-selected', i === current ? 'true' : 'false');
+            b.textContent = d.tab;
+            b.addEventListener('click', function () {
+                if (i === current) return;
+                current = i;
+                clearTimers();
+                renderTabs();
+                renderDemo();
             });
-
-            sharedAudio.addEventListener('ended', () => {
-                if (currentPlayingBtn) currentPlayingBtn.innerHTML = playIcon;
-                currentPlayingBtn = null;
-            });
-
-            /* ===== DEMO GENERAVIMO MYGTUKAS ===== */
-            const demoText = document.getElementById('demo-text');
-            const charCurrent = document.getElementById('char-current');
-            const btnGenerate = document.getElementById('btn-generate');
-            const demoStatus = document.getElementById('demo-status');
-            const demoAudio = document.getElementById('demo-audio');
-
-            if (demoText && charCurrent) {
-                demoText.addEventListener('input', () => { 
-                    charCurrent.textContent = demoText.value.length; 
-                });
-            }
-
-            if (demoVoiceSelect && demoText && charCurrent) {
-                demoVoiceSelect.addEventListener('change', () => {
-                    const selectedVoice = voices.find(v => v.id === demoVoiceSelect.value);
-                    if (selectedVoice && selectedVoice.sampleText) {
-                        demoText.value = selectedVoice.sampleText;
-                        charCurrent.textContent = demoText.value.length;
-                    }
-                });
-            }
-
-            if (btnGenerate) {
-                btnGenerate.addEventListener('click', async () => {
-                    const text = demoText.value.trim();
-                    const voiceId = demoVoiceSelect.value;
-                    const btnText = btnGenerate.querySelector('.btn-text');
-                    const btnIcon = btnGenerate.querySelector('.btn-icon');
-
-                    if (demoStatus) {
-                        demoStatus.className = 'status-msg';
-                        demoStatus.textContent = '';
-                    }
-
-                    if (!text) {
-                        if (demoStatus) {
-                            demoStatus.className = 'status-msg error';
-                            demoStatus.textContent = 'Please enter some text to generate speech.';
-                        }
-                        return;
-                    }
-
-                    btnGenerate.disabled = true;
-                    if (btnText) btnText.textContent = 'Generating speech...';
-                    if (btnIcon) btnIcon.style.display = 'inline-block';
-
-                    try {
-                        const audioUrl = await generateTTS(text, voiceId, () => {
-                            if (demoStatus) {
-                                demoStatus.className = 'status-msg';
-                                demoStatus.textContent = 'Waking up the voice server, this can take up to a minute...';
-                            }
-                        });
-                        demoAudio.src = audioUrl;
-                        demoAudio.style.display = 'block';
-                        if (demoStatus) {
-                            demoStatus.className = 'status-msg success';
-                            demoStatus.textContent = 'Speech generated successfully!';
-                        }
-                        await demoAudio.play().catch(() => {});
-                    } catch (error) {
-                        console.error("Demo TTS error:", error);
-                        if (demoStatus) {
-                            demoStatus.className = 'status-msg error';
-                            demoStatus.textContent = 'Generation error: ' + (error.message || 'Server unavailable');
-                        }
-                    } finally {
-                        btnGenerate.disabled = false;
-                        if (btnText) btnText.textContent = 'Generate speech';
-                        if (btnIcon) btnIcon.style.display = 'none';
-                    }
-                });
-            }
-
-            /* ===== FAQ ACCORDION ===== */
-            document.querySelectorAll('.faq-question').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-                    document.querySelectorAll('.faq-question').forEach(other => {
-                        other.setAttribute('aria-expanded', 'false');
-                        if (other.nextElementSibling) other.nextElementSibling.style.maxHeight = null;
-                    });
-                    if (!isExpanded) {
-                        btn.setAttribute('aria-expanded', 'true');
-                        const answer = btn.nextElementSibling;
-                        if (answer) answer.style.maxHeight = answer.scrollHeight + 'px';
-                    }
-                });
-            });
+            tabsEl.appendChild(b);
         });
-    </script>
+    }
+
+    function renderDemo() {
+        var d = demos[current];
+        var stepsHTML = d.steps.map(function (s, i) {
+            return '<li class="step" data-step="' + i + '"><span class="badge">' + (i + 1) + '</span>' +
+                '<div><div class="name">' + s.name + '</div><div class="detail">' + s.detail + '</div></div></li>';
+        }).join('');
+
+        stage.innerHTML =
+            '<div class="stage-top">' +
+                '<div><p class="title">' + d.title + '</p><p class="recorded">Recorded run on sample data</p></div>' +
+                '<button class="btn btn-primary" id="run-btn" type="button">▶ Run workflow</button>' +
+            '</div>' +
+            '<div class="cols">' +
+                '<div class="panel"><div class="label">' + d.inputLabel + '</div>' + d.input() + '</div>' +
+                '<div class="panel"><div class="label">Automated steps</div><ol class="steps">' + stepsHTML + '</ol></div>' +
+                '<div class="panel"><div class="label">Result</div>' + d.output() + '</div>' +
+            '</div>' +
+            '<div class="compare">' +
+                '<div><div class="k">By hand</div><div class="v">' + d.manual + '</div></div>' +
+                '<div class="auto"><div class="k">Automated</div><div class="v">' + d.auto + '</div></div>' +
+            '</div>' +
+            '<p class="fine">Timings are illustrative and depend on your tools and volume.</p>';
+
+        document.getElementById('run-btn').addEventListener('click', runDemo);
+    }
+
+    function resetRun() {
+        stage.querySelectorAll('.step').forEach(function (el) { el.classList.remove('running', 'done'); });
+        stage.querySelectorAll('[data-reveal]').forEach(function (el) { el.classList.remove('on'); });
+    }
+
+    function runDemo() {
+        if (running) return;
+        clearTimers();
+        resetRun();
+        running = true;
+
+        var btn = document.getElementById('run-btn');
+        btn.disabled = true;
+        btn.textContent = 'Running…';
+
+        var d = demos[current];
+        var stepMs = reduceMotion ? 80 : 900;
+        var steps = stage.querySelectorAll('.step');
+
+        d.steps.forEach(function (s, i) {
+            timers.push(setTimeout(function () {
+                steps[i].classList.add('running');
+            }, i * stepMs));
+            timers.push(setTimeout(function () {
+                steps[i].classList.remove('running');
+                steps[i].classList.add('done');
+                stage.querySelectorAll('[data-reveal="' + i + '"]').forEach(function (el) { el.classList.add('on'); });
+                if (i === d.steps.length - 1) {
+                    running = false;
+                    btn.disabled = false;
+                    btn.textContent = '↻ Run again';
+                }
+            }, (i + 1) * stepMs - Math.round(stepMs * 0.1)));
+        });
+    }
+
+    renderTabs();
+    renderDemo();
+
+    /* ===== SAVINGS CALCULATOR ===== */
+    var hoursIn = document.getElementById('c-hours');
+    var rateIn = document.getElementById('c-rate');
+    var pctIn = document.getElementById('c-pct');
+    var pctOut = document.getElementById('c-pct-out');
+    var rHours = document.getElementById('r-hours');
+    var rMoney = document.getElementById('r-money');
+    var rYear = document.getElementById('r-year');
+
+    function fmtMoney(n) {
+        return '€' + Math.round(n).toLocaleString('en-GB');
+    }
+
+    function calc() {
+        var hours = Math.max(0, parseFloat(hoursIn.value) || 0);
+        var rate = Math.max(0, parseFloat(rateIn.value) || 0);
+        var pct = parseFloat(pctIn.value) || 0;
+        pctOut.textContent = pct;
+        var monthlyHours = hours * 52 / 12 * pct / 100;
+        var monthlyMoney = monthlyHours * rate;
+        rHours.textContent = (Math.round(monthlyHours * 10) / 10).toLocaleString('en-GB') + ' h';
+        rMoney.textContent = fmtMoney(monthlyMoney);
+        rYear.textContent = fmtMoney(monthlyMoney * 12);
+    }
+    [hoursIn, rateIn, pctIn].forEach(function (el) { el.addEventListener('input', calc); });
+    calc();
+});
+</script>
 </body>
 </html>
