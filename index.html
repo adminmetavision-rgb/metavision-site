@@ -480,7 +480,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const HF_HOST = "https://marius500-metavision-tts-api.hf.space";
-            const TTS_ENDPOINT = HF_HOST + "/tts";
 
             /* ===== THEME ===== */
             let currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -674,7 +673,78 @@
                 fillVoiceSelect();
             }
 
-            /* ===== TTS API: POST /tts (JSON) -> audio/mpeg ===== */
+            /* ===== TTS API: Gradio /call/predict (2 zingsniai) -> audio/mpeg ===== */
+            async function fetchGradioAudio(text, voiceId, signal) {
+                // Gradio 5: /gradio_api/call/predict ; Gradio 4: /call/predict
+                const bases = [HF_HOST + '/gradio_api', HF_HOST];
+                let lastErr;
+                for (const base of bases) {
+                    try {
+                        const start = await fetch(base + '/call/predict', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ data: [text, voiceId] }),
+                            signal: signal
+                        });
+                        if (start.status === 404) {
+                            lastErr = new Error('HTTP 404 (' + base + ')');
+                            continue;
+                        }
+                        if (!start.ok) {
+                            const d = await start.text().catch(() => '');
+                            const e = new Error('HTTP ' + start.status + (d ? ': ' + d.slice(0, 200) : ''));
+                            e.status = start.status;
+                            throw e;
+                        }
+                        const startJson = await start.json();
+                        const eventId = startJson && startJson.event_id;
+                        if (!eventId) throw new Error('No event_id from server');
+
+                        const res = await fetch(base + '/call/predict/' + eventId, { signal: signal });
+                        if (!res.ok) {
+                            const e = new Error('HTTP ' + res.status);
+                            e.status = res.status;
+                            throw e;
+                        }
+                        const body = await res.text();
+
+                        let currentEvent = null;
+                        let finalEvent = null;
+                        let finalData = null;
+                        for (const line of body.split('\n')) {
+                            if (line.startsWith('event:')) {
+                                currentEvent = line.slice(6).trim();
+                            } else if (line.startsWith('data:') && (currentEvent === 'complete' || currentEvent === 'error')) {
+                                finalEvent = currentEvent;
+                                finalData = line.slice(5).trim();
+                            }
+                        }
+                        if (finalEvent !== 'complete') {
+                            throw new Error('TTS error: ' + (finalData || 'unknown'));
+                        }
+
+                        const out = JSON.parse(finalData);
+                        const file = Array.isArray(out) ? out[0] : out;
+                        const fileUrl = file && (file.url || (file.path ? base + '/file=' + file.path : null));
+                        if (!fileUrl) throw new Error('No audio file in response');
+
+                        const audioRes = await fetch(fileUrl, { signal: signal });
+                        if (!audioRes.ok) {
+                            const e = new Error('HTTP ' + audioRes.status + ' (audio file)');
+                            e.status = audioRes.status;
+                            throw e;
+                        }
+                        const blob = await audioRes.blob();
+                        if (!blob.size) throw new Error('Empty audio response');
+                        return blob;
+                    } catch (e) {
+                        lastErr = e;
+                        if (e.name === 'AbortError' || e.status) throw e;
+                    }
+                }
+                throw lastErr || new Error('Server unavailable');
+            }
+
             const ttsCache = new Map();
             const REQUEST_TIMEOUT_MS = 90000;   // free HF Space may need up to ~1 min to wake up
             const MAX_RETRIES = 2;
@@ -704,22 +774,7 @@
                     const slowTimer = onSlow ? setTimeout(onSlow, SLOW_NOTICE_MS) : null;
 
                     try {
-                        const response = await fetch(TTS_ENDPOINT, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ text: cleanText, voice: voiceId }),
-                            signal: controller.signal
-                        });
-
-                        if (!response.ok) {
-                            const detail = await response.text().catch(() => '');
-                            const httpErr = new Error('HTTP ' + response.status + (detail ? ': ' + detail.slice(0, 200) : ''));
-                            httpErr.status = response.status;
-                            throw httpErr;
-                        }
-
-                        const blob = await response.blob();
-                        if (!blob.size) throw new Error('Empty audio response');
+                        const blob = await fetchGradioAudio(cleanText, voiceId, controller.signal);
 
                         const url = URL.createObjectURL(blob);
                         ttsCache.set(cacheKey, url);
