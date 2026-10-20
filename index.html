@@ -480,6 +480,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const HF_HOST = "https://marius500-metavision-tts-api.hf.space";
+            const TTS_ENDPOINT = HF_HOST + "/tts";
 
             /* ===== THEME ===== */
             let currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -673,23 +674,81 @@
                 fillVoiceSelect();
             }
 
-            /* ===== TIESIOGINĖ IR GREITA API JUNGTIS (Be jokių Gradio klaidų!) ===== */
-            async function generateTTS(text, voiceId) {
-                const params = new URLSearchParams({
-                    text: text.slice(0, 300),
-                    voice: voiceId
-                });
-                const response = await fetch(`${HF_HOST}/tts?${params.toString()}`);
-                if (!response.ok) {
-                    throw new Error(`Server status: ${response.status}`);
+            /* ===== TTS API: POST /tts (JSON) -> audio/mpeg ===== */
+            const ttsCache = new Map();
+            const REQUEST_TIMEOUT_MS = 90000;   // free HF Space may need up to ~1 min to wake up
+            const MAX_RETRIES = 2;
+            const SLOW_NOTICE_MS = 8000;
+
+            function describeError(err) {
+                if (err && err.name === 'AbortError') {
+                    return 'Request timed out. The server may be waking up, please try again.';
                 }
-                const blob = await response.blob();
-                return URL.createObjectURL(blob);
+                if (err && err.name === 'TypeError') {
+                    return 'Cannot reach the server (network or CORS error). Check that the Space is Running.';
+                }
+                return (err && err.message) ? err.message : 'Server unavailable';
+            }
+
+            async function generateTTS(text, voiceId, onSlow) {
+                const cleanText = String(text || '').trim().slice(0, 300);
+                if (!cleanText) throw new Error('Empty text');
+
+                const cacheKey = voiceId + '||' + cleanText;
+                if (ttsCache.has(cacheKey)) return ttsCache.get(cacheKey);
+
+                let lastError;
+                for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+                    const controller = new AbortController();
+                    const timeoutTimer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+                    const slowTimer = onSlow ? setTimeout(onSlow, SLOW_NOTICE_MS) : null;
+
+                    try {
+                        const response = await fetch(TTS_ENDPOINT, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ text: cleanText, voice: voiceId }),
+                            signal: controller.signal
+                        });
+
+                        if (!response.ok) {
+                            const detail = await response.text().catch(() => '');
+                            const httpErr = new Error('HTTP ' + response.status + (detail ? ': ' + detail.slice(0, 200) : ''));
+                            httpErr.status = response.status;
+                            throw httpErr;
+                        }
+
+                        const blob = await response.blob();
+                        if (!blob.size) throw new Error('Empty audio response');
+
+                        const url = URL.createObjectURL(blob);
+                        ttsCache.set(cacheKey, url);
+                        return url;
+                    } catch (err) {
+                        lastError = err;
+                        // No point retrying client errors (4xx)
+                        if (err.status && err.status >= 400 && err.status < 500) break;
+                        if (attempt < MAX_RETRIES) {
+                            await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+                        }
+                    } finally {
+                        clearTimeout(timeoutTimer);
+                        if (slowTimer) clearTimeout(slowTimer);
+                    }
+                }
+
+                const finalErr = new Error(describeError(lastError));
+                finalErr.cause = lastError;
+                throw finalErr;
             }
 
             /* ===== KORTELIŲ GROTUVAS ===== */
             const sharedAudio = new Audio();
             let currentPlayingBtn = null;
+
+            function resetAllPlayButtons() {
+                document.querySelectorAll('.voice-play-btn').forEach(b => b.innerHTML = playIcon);
+            }
 
             document.addEventListener('click', async (e) => {
                 const btn = e.target.closest('.voice-play-btn');
@@ -699,32 +758,47 @@
                 const voice = voices.find(v => v.id === voiceId);
                 if (!voice) return;
 
+                // Toggle pause on the same card
                 if (currentPlayingBtn === btn && !sharedAudio.paused) {
                     sharedAudio.pause();
                     btn.innerHTML = playIcon;
                     return;
                 }
 
-                document.querySelectorAll('.voice-play-btn').forEach(b => b.innerHTML = playIcon);
+                sharedAudio.pause();
+                resetAllPlayButtons();
+                currentPlayingBtn = null;
                 btn.innerHTML = '<span class="spin">⏳</span>';
-                if (voicesStatus) voicesStatus.textContent = '';
+                btn.disabled = true;
+                if (voicesStatus) {
+                    voicesStatus.className = 'status-msg';
+                    voicesStatus.textContent = '';
+                }
 
                 try {
                     const audioUrl = voice.sampleUrl 
                         ? voice.sampleUrl 
-                        : await generateTTS(voice.sampleText, voice.id);
+                        : await generateTTS(voice.sampleText, voice.id, () => {
+                            if (voicesStatus) {
+                                voicesStatus.className = 'status-msg';
+                                voicesStatus.textContent = 'Waking up the voice server, this can take up to a minute...';
+                            }
+                        });
 
                     sharedAudio.src = audioUrl;
                     await sharedAudio.play();
                     btn.innerHTML = pauseIcon;
                     currentPlayingBtn = btn;
+                    if (voicesStatus) voicesStatus.textContent = '';
                 } catch (err) {
                     console.error("Card playback error:", err);
                     btn.innerHTML = playIcon;
                     if (voicesStatus) {
                         voicesStatus.className = 'status-msg error';
-                        voicesStatus.textContent = 'Nepavyko paleisti garso pavyzdžio. Patikrinkite, ar Hugging Face serveris įjungtas.';
+                        voicesStatus.textContent = 'Nepavyko paleisti garso pavyzdžio: ' + (err.message || 'serveris nepasiekiamas');
                     }
+                } finally {
+                    btn.disabled = false;
                 }
             });
 
@@ -781,7 +855,12 @@
                     if (btnIcon) btnIcon.style.display = 'inline-block';
 
                     try {
-                        const audioUrl = await generateTTS(text, voiceId);
+                        const audioUrl = await generateTTS(text, voiceId, () => {
+                            if (demoStatus) {
+                                demoStatus.className = 'status-msg';
+                                demoStatus.textContent = 'Waking up the voice server, this can take up to a minute...';
+                            }
+                        });
                         demoAudio.src = audioUrl;
                         demoAudio.style.display = 'block';
                         if (demoStatus) {
